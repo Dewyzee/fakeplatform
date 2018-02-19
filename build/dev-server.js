@@ -19,6 +19,7 @@ const webpack = require('webpack');
 const proxyMiddleware = require('http-proxy-middleware');
 const DashboardPlugin = require('webpack-dashboard/plugin');
 const mockMiddleware = require('./middleware/mock');
+const debugEnv = process.argv.slice(2);
 
 const webpackConfig = (process.env.NODE_ENV === 'testing' || process.env.NODE_ENV === 'production')
     ? require('./webpack.prod.conf')
@@ -58,11 +59,25 @@ Object.keys(proxyTable).forEach(function (context) {
         };
     }
     options.logLevel = 'warn';
-    app.use(context, proxyMiddleware(filter, options));
-    app.use(context, mockMiddleware);
+    console.log(context);
+    if (debugEnv[0] === 'proxy') {
+        app.use(context, proxyMiddleware(filter, options));
+    }
+    if (debugEnv[0] === 'mock') {
+        app.use(context, mockMiddleware);
+    }
 });
 
+
+// handle fallback for HTML5 history API
+app.use(require('connect-history-api-fallback')());
+
+// serve webpack bundle output
+app.use(devMiddleware);
+
 const staticPath = path.posix.join(config.dev.assetsPublicPath, config.dev.assetsSubDirectory);
+
+console.log(staticPath);
 app.use(staticPath, express.static('./static'));
 
 const uri = 'http://localhost:' + port;

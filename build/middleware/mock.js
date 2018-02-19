@@ -8,8 +8,11 @@
  module.exports = function (req, res, next) {
     const baseUrl = req.baseUrl;
     const reqPath = req.path;
-    const mockFile = path.join(__dirname, '../../mock', baseUrl, reqPath);
 
+    console.log(baseUrl, reqPath);
+    const mockFilePath = path.join(__dirname, '../../mock', baseUrl);
+
+    console.log(mockFilePath);
     delete require.cache[require.resolve(mockFilePath)];
     
     const resHandler = require(mockFilePath);
